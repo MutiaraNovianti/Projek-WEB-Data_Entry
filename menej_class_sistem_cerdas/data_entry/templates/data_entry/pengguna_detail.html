@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<h2>User Details</h2>
+
+<!-- Simpan user_id di data attribute -->
+<div id="user-details" data-user-id="{{ user_id|default:'' }}">
+    <p><i class="fa fa-spinner fa-spin"></i> Loading user details...</p>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const userDetailsDiv = document.getElementById('user-details');
+    const userId = userDetailsDiv.dataset.userId;
+
+    // Cek kalau userId kosong/null
+    if (!userId) {
+        userDetailsDiv.innerHTML = "<p>Error: User ID not provided.</p>";
+        return;
+    }
+
+    // Ambil data dari API endpoint
+    fetch(`/api/pengguna/${userId}/`)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Format tanggal join ke format lokal Indonesia
+        const joinDate = data.tanggal_join
+            ? new Date(data.tanggal_join).toLocaleDateString('id-ID')
+            : 'N/A';
+
+        // Buat HTML tabel user details
+        const tableHtml = `
+            <table class="table">
+                <tbody>
+                    <tr><th scope="row">Email</th><td>${data.email || 'N/A'}</td></tr>
+                    <tr><th scope="row">Address 1</th><td>${data.address_1 || 'N/A'}</td></tr>
+                    <tr><th scope="row">Address 2</th><td>${data.address_2 || 'N/A'}</td></tr>
+                    <tr><th scope="row">City</th><td>${data.city || 'N/A'}</td></tr>
+                    <tr><th scope="row">State</th><td>${data.state || 'N/A'}</td></tr>
+                    <tr><th scope="row">Zip Code</th><td>${data.zip_code || 'N/A'}</td></tr>
+                    <tr><th scope="row">Tanggal Join</th><td>${joinDate}</td></tr>
+                </tbody>
+            </table>
+        `;
+
+        // Tampilkan hasil ke div
+        userDetailsDiv.innerHTML = tableHtml;
+    })
+    .catch(error => {
+        console.error('Error fetching user details:', error);
+        userDetailsDiv.innerHTML = "<p>Failed to load user details.</p>";
+    });
+});
+</script>
+
+{% endblock %}

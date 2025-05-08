@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="alert alert-warning" role="alert">
+    <p>Pengguna Email = {{ pengguna.email }}</p>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div class="form-row">
+        <div class="form-group col-md-6 mb-0">
+            {{ form.author|as_crispy_field }}
+        </div>
+        <div class="form-group col-md-6 mb-0">
+            {{ form.set_view|as_crispy_field }}
+        </div>
+        {{ form.artikel|as_crispy_field }}
+
+    </div>
+
+
+
+    <button type="submit" class="btn btn-primary">Simpan</button>
+</form>
+<br>
+<p>Content yang di create oleh pengguna yang ada di session</p>
+<table class="table table-bordered">
+    <thead>
+        <tr class="text-center table-light">
+            <th>Pengguna</th>
+            <th>Artikel</th>
+            <th>tanggal create</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for content in isi_tabel %}
+        <tr class="record">
+            <td>{{ content.author.email }}</td>
+            <td>{{ content.artikel }}</td>
+            <td>{{ content.date_created }}</td>
+           
+            <td class="text-center">
+                <a href="{% url 'data_entry:view_content' content.id %}" class="btn btn-outline-success btn-sm">View</a>
+                <a href="{% url 'data_entry:edit_content' content.id %}" class="btn btn-outline-primary btn-sm">Edit</a>
+                <a href="{% url 'data_entry:delete_content' content.id %}" class="btn btn-outline-danger btn-sm"
+                   onclick="return confirm('Yakin ingin menghapus konten ini?');">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3" class="text-center">Data Belum ada</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
